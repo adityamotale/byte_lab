@@ -10,7 +10,7 @@ The benchmark measures throughput using a dynamically allocated 256 MiB string,
 * Throughput: ~12.5 GiB/s
 * Limiting Factor: Memory-bound (Single-Core LFB Limit)
 
-> [!INFO]
+> [!TIP]
 > Despite AVX-512 theoretically being capable of processing 100+ GB/s per core, the throughput hits a hard wall at
 > ~12.5 GiB/s. This is an architectural limitation, not a compute one. The bottleneck is strictly caused by the
 > single core's Line Fill Buffers (LFBs) choking against pure RAM latency. Once a core's LFBs are fully saturated
