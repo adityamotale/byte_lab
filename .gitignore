@@ -1,0 +1,13 @@
+# Ignore everything by default
+*
+
+# Allow subdirectories to be checked
+!*/
+
+# Allow following
+!**.c
+!**.asm
+!**.nix
+!**.md
+!**.gitignore
+!**.toml
