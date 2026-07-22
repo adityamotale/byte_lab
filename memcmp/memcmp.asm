@@ -11,24 +11,14 @@ section .text
         global _start
 
 _start:
-        vmovdqu ymm0, [rel a]
-        vmovdqu ymm1, [rel b]
-
-        vpcmpeqb ymm2, ymm0, ymm1
+        vmovdqa ymm0, [rel a]
+        vpcmpeqb ymm2, ymm0, [rel b]
+        
         vpmovmskb eax, ymm2
         
-        cmp eax, -1          
-        jne .not_equal
-
-    .equal:
-        xor edi, edi 
-        jmp .exit
-
-    .not_equal:
-        mov edi, 1           
-
-    .exit:
-        vzeroupper
-
-        mov eax, 0x3C 
+        inc eax 
+        setne dil
+        movzx edi, dil 
+        
+        mov eax, 0x3C
         syscall
