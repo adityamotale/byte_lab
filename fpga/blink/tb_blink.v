@@ -2,8 +2,8 @@
 
 module tb_blink;
 
-  reg   clk = 0;
-  write led;
+  reg  clk = 0;
+  wire led;
 
   blink uut (
       .clk(clk),

@@ -1,9 +1,14 @@
 module blink (
     input  wire clk,
-    output reg  led = 0
+    output reg  led
 );
 
-  reg [3:0] counter = 0;
+  reg [3:0] counter;
+
+  initial begin
+    led = 0;
+    counter = 0;
+  end
 
   always @(posedge clk) begin
     if (counter == 9) begin
