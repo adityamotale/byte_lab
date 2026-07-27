@@ -13,3 +13,4 @@
 !**.toml
 !**.v
 !**Makefile
+!**.cu
