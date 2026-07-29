@@ -4,7 +4,7 @@ module tb_counter;
 
   reg clk;
   reg rst;
-  reg [7:0] count;
+  wire [7:0] count;
 
   counter uut (
       .clk  (clk),
@@ -15,17 +15,22 @@ module tb_counter;
   // 100 Mhz clock
   always #5 clk = ~clk;
 
+  // print for every rising edge
+  always @(posedge clk) begin
+    $display("time=%0t rst=%b count=%0d (0x%02h)", $time, rst, count, count);
+  end
+
   initial begin
     $dumpfile("counter.vcd");
     $dumpvars(0, tb_counter);
   end
 
   initial begin
-    clk = 8'd0;
-    rst = 8'd1;
+    clk = 1'b0;
+    rst = 1'b1;
 
     #20;
-    rst = 8'd0;
+    rst = 1'b0;
 
     #300;
     $finish;

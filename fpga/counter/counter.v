@@ -1,7 +1,7 @@
 module counter (
     input wire clk,
     input wire rst,
-    input reg [7:0] count
+    output reg [7:0] count
 );
 
   always @(posedge clk) begin
