@@ -1,10 +1,11 @@
+#include <chrono>
 #include <cstdint>
 #include <cuda_runtime.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#define N 0x3E80
-#define THREADS_PER_BLOCK 0x200
+#define N (1 << 0x1A)
+#define THREADS_PER_BLOCK 0x1000
 
 __global__ void reduce(const uint32_t *in, uint32_t *out, const size_t n) {
   extern __shared__ uint32_t sdata[];
@@ -42,6 +43,25 @@ int main(void) {
     h_slice[i] = i;
   }
 
+  //
+  // CPU bench
+  //
+
+  auto cpu_start = std::chrono::high_resolution_clock::now();
+
+  uint32_t cpu_sum = 0;
+  for (size_t i = 0; i < N; i++) {
+    cpu_sum += h_slice[i];
+  }
+
+  auto cpu_end = std::chrono::high_resolution_clock::now();
+  double cpu_ms =
+      std::chrono::duration<double, std::milli>(cpu_end - cpu_start).count();
+
+  //
+  // GPU bench
+  //
+
   uint32_t *d_slice = NULL;
   uint32_t *d_blocks = NULL;
 
@@ -50,19 +70,36 @@ int main(void) {
 
   cudaMemcpy(d_slice, h_slice, bytes, cudaMemcpyHostToDevice);
 
+  cudaEvent_t start, stop;
+  cudaEventCreate(&start);
+  cudaEventCreate(&stop);
+
+  cudaEventRecord(start);
+
   reduce<<<blocks, THREADS_PER_BLOCK, THREADS_PER_BLOCK * sizeof(uint32_t)>>>(
       d_slice, d_blocks, N);
 
-  cudaDeviceSynchronize();
+  cudaEventRecord(stop);
+  cudaEventSynchronize(stop);
+
+  float gpu_ms = 0.0f;
+  cudaEventElapsedTime(&gpu_ms, start, stop);
+
   cudaMemcpy(h_blocks, d_blocks, blocks * sizeof(uint32_t),
              cudaMemcpyDeviceToHost);
 
-  uint32_t sum = 0;
+  uint32_t gpu_sum = 0;
   for (int i = 0; i < blocks; i++) {
-    sum += h_blocks[i];
+    gpu_sum += h_blocks[i];
   }
 
-  printf("SUM: %d\n", sum);
+  printf("CPU Sum        : %u\n", cpu_sum);
+  printf("GPU Sum        : %u\n", gpu_sum);
+  printf("CPU Time       : %.6f ms\n", cpu_ms);
+  printf("GPU Kernel Time: %.6f ms\n", gpu_ms);
+
+  cudaEventDestroy(start);
+  cudaEventDestroy(stop);
 
   cudaFree(d_slice);
   cudaFree(d_blocks);
